@@ -1,0 +1,23 @@
+#!/bin/bash
+
+echo "Welcome to the Wfuzz Vulnerability Assessment Tool"
+echo "Please select the level of intensity (1-5): "
+echo "1. COMMON"
+echo "2. BIG"
+echo "3. EXTENSIVE"
+echo "4. HUGE"
+echo "5. Quick Hit"
+
+read -p "Enter your choice (1-5): " intensity
+
+echo "Please enter the target host (e.g. http://example.com): "
+read target_host
+
+case $intensity in
+  1) wfuzz -c -z file,/usr/share/dirb/wordlists/common.txt --hc 404 $target_host/FUZZ;;
+  2) wfuzz -c -z file,/usr/share/dirb/wordlists/big.txt --hc 404 $target_host/FUZZ;;
+  3) wfuzz -c -z file,/usr/share/dirb/wordlists/extensive.txt --hc 404 $target_host/FUZZ;;
+  4) wfuzz -c -z file,/usr/share/dirb/wordlists/huge.txt --hc 404 $target_host/FUZZ;;
+  5) wfuzz -c -z file,/usr/share/dirb/wordlists/quickhit.txt --hc 404 $target_host/FUZZ;;
+  *) echo "Invalid input, please choose a value between 1 and 5"
+esac
