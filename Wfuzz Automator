@@ -1,23 +1,77 @@
 #!/bin/bash
 
 echo "Welcome to the Wfuzz Vulnerability Assessment Tool"
-echo "Please select the level of intensity (1-5): "
+echo "Please select the level of intensity:"
 echo "1. COMMON"
 echo "2. BIG"
 echo "3. EXTENSIVE"
 echo "4. HUGE"
-echo "5. Quick Hit"
+echo "5. QUICK HIT"
 
-read -p "Enter your choice (1-5): " intensity
+while true; do
+    read -p "Enter the number corresponding to your choice (1-5): " intensity
+    if [[ $intensity =~ ^[1-5]$ ]]; then
+        break
+    else
+        echo "Invalid input. Please enter a number between 1 and 5."
+    fi
+done
 
 echo "Please enter the target host (e.g. http://example.com): "
-read target_host
+
+while true; do
+    read -p "Target host: " target_host
+    if [[ $target_host =~ ^https?://.* ]]; then
+        break
+    else
+        echo "Invalid input. Please enter a valid URL starting with http:// or https://."
+    fi
+done
+
+echo "Please enter the wordlist file path (e.g. /usr/share/dirb/wordlists/common.txt): "
+
+while true; do
+    read -p "Wordlist file path: " wordlist_file
+    if [[ -f $wordlist_file ]]; then
+        break
+    else
+        echo "Invalid file path. Please enter a valid path to the wordlist file."
+    fi
+done
+
+echo "Please enter the status code to ignore (e.g. 404): "
+
+while true; do
+    read -p "Status code to ignore: " ignore_status
+    if [[ $ignore_status =~ ^[0-9]+$ ]]; then
+        break
+    else
+        echo "Invalid input. Please enter a valid status code (e.g. 404)."
+    fi
+done
 
 case $intensity in
-  1) wfuzz -c -z file,/usr/share/dirb/wordlists/common.txt --hc 404 $target_host/FUZZ;;
-  2) wfuzz -c -z file,/usr/share/dirb/wordlists/big.txt --hc 404 $target_host/FUZZ;;
-  3) wfuzz -c -z file,/usr/share/dirb/wordlists/extensive.txt --hc 404 $target_host/FUZZ;;
-  4) wfuzz -c -z file,/usr/share/dirb/wordlists/huge.txt --hc 404 $target_host/FUZZ;;
-  5) wfuzz -c -z file,/usr/share/dirb/wordlists/quickhit.txt --hc 404 $target_host/FUZZ;;
-  *) echo "Invalid input, please choose a value between 1 and 5"
+    1)
+        echo "Scanning with common wordlist..."
+        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
+        ;;
+    2)
+        echo "Scanning with big wordlist..."
+        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
+        ;;
+    3)
+        echo "Scanning with extensive wordlist..."
+        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
+        ;;
+    4)
+        echo "Scanning with huge wordlist..."
+        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
+        ;;
+    5)
+        echo "Scanning with quick hit wordlist..."
+        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
+        ;;
+    *)
+        echo "Invalid input, please choose a value between 1 and 5"
+        ;;
 esac
