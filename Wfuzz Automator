@@ -17,17 +17,6 @@ while true; do
     fi
 done
 
-echo "Please enter the target host (e.g. http://example.com): "
-
-while true; do
-    read -p "Target host: " target_host
-    if [[ $target_host =~ ^https?://.* ]]; then
-        break
-    else
-        echo "Invalid input. Please enter a valid URL starting with http:// or https://."
-    fi
-done
-
 echo "Please enter the wordlist file path (e.g. /usr/share/dirb/wordlists/common.txt): "
 
 while true; do
@@ -63,52 +52,71 @@ if [[ $use_proxy =~ ^[yY]$ ]]; then
             echo "Invalid input. Please enter a valid URL starting with http:// or https:// and a valid port number."
         fi
     done
+fi
 
-    case $intensity in
-        1)
-            echo "Scanning with common wordlist using proxy..."
-            wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
-            ;;
-        2)
-            echo "Scanning with big wordlist using proxy..."
-            wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
-            ;;
-        3)
-            echo "Scanning with extensive wordlist using proxy..."
-            wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
-            ;;
-        4)
-            echo "Scanning with huge wordlist using proxy..."
-            wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
-            ;;
-        5)
-           echo "Scanning with quick hit wordlist using proxy..."
-wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
-;;
+echo "Please enter the target hosts (e.g. http://example.com http://example.org): "
+
+while read -a target_hosts; do
+    for target_host in "${target_hosts[@]}"; do
+        if [[ $target_host =~ ^https?://.* ]]; then
+            if [[ $use_proxy =~ ^[yY]$ ]]; then
+                case $intensity in
+                    1)
+                        echo "Scanning with common wordlist using proxy for $target_host..."
+                        wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+                        ;;
+                    2)
+                        echo "Scanning with big wordlist using proxy for $target_host..."
+                        wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+                        ;;
+                    3)
+                        echo "Scanning with extensive wordlist using proxy for $target_host..."
+                        wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+                        ;;
+                    4)
+                        echo "Scanning with huge wordlist using proxy for $target_host..."
+                        wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+                        ;;
+                    5)
+                        echo "Scanning with quick hit wordlist using proxy for $target_host..."
+                        wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+                        ;;
 esac
 else
 case $intensity in
 1)
-echo "Scanning with common wordlist..."
+echo "Scanning with common wordlist for $target_host..."
 wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
 ;;
 2)
-echo "Scanning with big wordlist..."
+echo "Scanning with big wordlist for $target_host..."
 wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
 ;;
 3)
-echo "Scanning with extensive wordlist..."
+echo "Scanning with extensive wordlist for $target_host..."
 wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
 ;;
 4)
-echo "Scanning with huge wordlist..."
+echo "Scanning with huge wordlist for $target_host..."
 wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
 ;;
 5)
-echo "Scanning with quick hit wordlist..."
+echo "Scanning with quick hit wordlist for $target_host..."
 wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
 ;;
 esac
 fi
+else
+echo "Invalid target host: $target_host. Please enter a valid URL starting with http:// or https://."
+fi
+done
+read -p "Would you like to scan another set of target hosts? [y/n]: " scan_another
 
-echo "Scan complete. Results saved to vulnerabilities.txt."
+if [[ ! $scan_another =~ ^[yY]$ ]]; then
+    break
+fi
+
+echo "Please enter the target hosts (e.g. http://example.com http://example.org): "
+done
+
+echo "Thank you for using the Wfuzz Vulnerability Assessment Tool. Vulnerabilities found have been written to vulnerabilities.txt."
