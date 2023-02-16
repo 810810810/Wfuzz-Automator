@@ -50,28 +50,65 @@ while true; do
     fi
 done
 
-case $intensity in
-    1)
-        echo "Scanning with common wordlist..."
-        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
-        ;;
-    2)
-        echo "Scanning with big wordlist..."
-        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
-        ;;
-    3)
-        echo "Scanning with extensive wordlist..."
-        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
-        ;;
-    4)
-        echo "Scanning with huge wordlist..."
-        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
-        ;;
-    5)
-        echo "Scanning with quick hit wordlist..."
-        wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ
-        ;;
-    *)
-        echo "Invalid input, please choose a value between 1 and 5"
-        ;;
+read -p "Would you like to use a proxy? [y/n]: " use_proxy
+
+if [[ $use_proxy =~ ^[yY]$ ]]; then
+    echo "Please enter the proxy host and port (e.g. http://proxy.example.com:8080): "
+
+    while true; do
+        read -p "Proxy host and port: " proxy_host_port
+        if [[ $proxy_host_port =~ ^https?://.*:[0-9]+$ ]]; then
+            break
+        else
+            echo "Invalid input. Please enter a valid URL starting with http:// or https:// and a valid port number."
+        fi
+    done
+
+    case $intensity in
+        1)
+            echo "Scanning with common wordlist using proxy..."
+            wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+            ;;
+        2)
+            echo "Scanning with big wordlist using proxy..."
+            wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+            ;;
+        3)
+            echo "Scanning with extensive wordlist using proxy..."
+            wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+            ;;
+        4)
+            echo "Scanning with huge wordlist using proxy..."
+            wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+            ;;
+        5)
+           echo "Scanning with quick hit wordlist using proxy..."
+wfuzz -c -z file,$wordlist_file --hc $ignore_status --proxy $proxy_host_port $target_host/FUZZ > vulnerabilities.txt
+;;
 esac
+else
+case $intensity in
+1)
+echo "Scanning with common wordlist..."
+wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
+;;
+2)
+echo "Scanning with big wordlist..."
+wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
+;;
+3)
+echo "Scanning with extensive wordlist..."
+wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
+;;
+4)
+echo "Scanning with huge wordlist..."
+wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
+;;
+5)
+echo "Scanning with quick hit wordlist..."
+wfuzz -c -z file,$wordlist_file --hc $ignore_status $target_host/FUZZ > vulnerabilities.txt
+;;
+esac
+fi
+
+echo "Scan complete. Results saved to vulnerabilities.txt."
